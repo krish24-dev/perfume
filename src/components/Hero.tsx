@@ -18,14 +18,29 @@ const Image1 = () => (
 const PremiumDecorations = () => {
   return (
     <>
-      {/* Elegant corner ornaments */}
+      {/* Elegant corner ornaments - Top Left */}
       <div className="absolute top-12 left-12 w-20 h-20 opacity-20">
         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-amber-700 to-transparent"></div>
         <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-amber-700 to-transparent"></div>
         <div className="absolute top-2 left-2 w-4 h-4 border border-amber-600 transform rotate-45"></div>
       </div>
 
+      {/* Elegant corner ornaments - Top Right */}
       <div className="absolute top-12 right-12 w-20 h-20 opacity-20 transform rotate-90">
+        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-amber-700 to-transparent"></div>
+        <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-amber-700 to-transparent"></div>
+        <div className="absolute top-2 left-2 w-4 h-4 border border-amber-600 transform rotate-45"></div>
+      </div>
+      
+      {/* Elegant corner ornaments - Bottom Right */}
+      <div className="absolute bottom-12 right-12 w-20 h-20 opacity-20 transform rotate-180">
+        <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-amber-700 to-transparent"></div>
+        <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-amber-700 to-transparent"></div>
+        <div className="absolute top-2 left-2 w-4 h-4 border border-amber-600 transform rotate-45"></div>
+      </div>
+      
+      {/* Elegant corner ornaments - Bottom Left */}
+      <div className="absolute bottom-12 left-12 w-20 h-20 opacity-20 transform -rotate-90">
         <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-amber-700 to-transparent"></div>
         <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-amber-700 to-transparent"></div>
         <div className="absolute top-2 left-2 w-4 h-4 border border-amber-600 transform rotate-45"></div>
@@ -33,7 +48,7 @@ const PremiumDecorations = () => {
 
       {/* Floating luxury elements */}
       <motion.div
-        className="absolute top-1/3 left-1/5 w-1 h-1 bg-amber-500 rounded-full"
+        className="absolute top-1/3 left-[20%] w-1 h-1 bg-amber-500 rounded-full"
         animate={{
           y: [0, -20, 0],
           opacity: [0.3, 0.8, 0.3],
@@ -47,7 +62,7 @@ const PremiumDecorations = () => {
       />
 
       <motion.div
-        className="absolute top-2/3 right-1/5 w-2 h-2 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"
+        className="absolute top-2/3 right-[20%] w-2 h-2 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full"
         animate={{
           y: [0, -30, 0],
           x: [0, 15, 0],
@@ -69,32 +84,7 @@ const PremiumDecorations = () => {
 };
 
 // Premium Badge Component
-const PremiumBadge = () => {
-  return (
-    <motion.div
-      className="absolute top-8 right-8 z-20"
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 1.5, duration: 0.8 }}
-    >
-      <div className="relative">
-        <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-2xl">
-          <div className="w-16 h-16 bg-gradient-to-br from-amber-300 to-amber-500 rounded-full flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-white text-xs font-bold tracking-wider">
-                EST
-              </div>
-              <div className="text-white text-lg font-bold leading-none">
-                1985
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="absolute -inset-2 bg-gradient-to-r from-amber-400 to-yellow-400 rounded-full blur opacity-30 animate-pulse"></div>
-      </div>
-    </motion.div>
-  );
-};
+
 
 // Main Hero Component
 const AttarHeroSection = () => {
@@ -142,12 +132,15 @@ const AttarHeroSection = () => {
   }, []);
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-[#f8efe3] via-[#f6e7d7] to-[#f3e3c3] ornament-pattern-ultra relative overflow-hidden flex items-center py-2 px-3 sm:py-4 sm:px-8 lg:py-12 lg:px-4">
+    <section className="min-h-screen bg-gradient-to-br from-[#f8efe3] via-[#f6e7d7] to-[#f3e3c3] ornament-pattern-ultra relative overflow-hidden flex items-center py-2 px-3 sm:py-4 sm:px-8 lg:py-12 lg:px-4 pt-[80px]">
       {/* Background decorative elements */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full blur-3xl"></div>
       </div>
+      
+      {/* Add the premium decorations */}
+      <PremiumDecorations />
 
       {/* Content Container */}
       <div className="relative z-10 container mx-auto flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12">
@@ -164,10 +157,10 @@ const AttarHeroSection = () => {
               className="text-lg sm:text-2xl md:text-3xl font-light text-[#8B4513] tracking-[0.2em] md:tracking-[0.25em] mb-1 md:mb-2"
               style={{ fontFamily: "serif" }}
             >
-              AL WAJHI OUDH
+              PREMIUM ITTARS
             </motion.h1>
             <p className="text-xs sm:text-sm text-amber-800/80 tracking-[0.1em] md:tracking-[0.15em] uppercase">
-              PREMIUM PERFUMERY
+              NATURAL PERFUMERY
             </p>
           </motion.div>
 
@@ -175,14 +168,14 @@ const AttarHeroSection = () => {
           <motion.div variants={itemVariants}>
             <h2 className="font-playfair">
               <motion.span className="block text-2xl sm:text-4xl md:text-6xl font-bold text-[#8B4513] leading-tight">
-                Arabian
+                Experience the 
               </motion.span>
               <motion.span className="block text-2xl sm:text-4xl md:text-6xl font-bold text-[#B8860B] leading-tight">
-                Excellence
+                Essence of Nature
               </motion.span>
             </h2>
             <motion.p className="text-lg sm:text-xl md:text-3xl font-serif italic text-[#8B4513] mt-1 md:mt-2">
-              Since 1985
+              With Our Premium Ittars
             </motion.p>
           </motion.div>
 
@@ -192,10 +185,10 @@ const AttarHeroSection = () => {
             className="space-y-2 md:space-y-4"
           >
             <p className="text-sm sm:text-base md:text-lg text-amber-900/80 leading-relaxed">
-              Discover the authentic Arabian fragrance tradition with our premium oud and perfumes.
+              Step into a world of timeless elegance and pure indulgence with our handcrafted ittars.
             </p>
             <p className="text-sm sm:text-base md:text-lg text-amber-800/70 italic">
-              Meticulously crafted using traditional Arabian techniques, our fragrances capture the essence of Middle Eastern luxury.
+              Handcrafted natural perfumes made from pure essential oils — alcohol-free, long-lasting, and truly unforgettable.
             </p>
           </motion.div>
 
@@ -204,7 +197,7 @@ const AttarHeroSection = () => {
             variants={itemVariants}
             className="flex flex-wrap gap-4 sm:gap-6 md:gap-8 justify-center md:justify-start mt-4 md:mt-6"
           >
-            {["100% AUTHENTIC", "PREMIUM OUD", "LONG-LASTING"].map(
+            {["100% NATURAL", "TRADITIONAL SCENTS", "NO ALCOHOL"].map(
               (feature, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-amber-600 rounded-full"></div>
@@ -224,7 +217,7 @@ const AttarHeroSection = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                Explore Collection
+                View Products
               </motion.button>
             </Link>
           </motion.div>

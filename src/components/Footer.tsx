@@ -1,8 +1,79 @@
 
 import React from 'react';
-import { Star } from 'lucide-react';
+import { Star, Clock, MapPin, Phone, Mail, Heart } from 'lucide-react';
 
 const Footer = () => {
+  const reviews = [
+    {
+      name: "Kausar Afeef",
+      text: "I went to this shop for a custom ring, this shop was recommended by a local. I'm very happy with the service and honesty from Mr. M Vajeeh and his assistants at the shop. They have a wide variety of Kurtas, Attar and jewelry at an affordable price. His assistant Roxana was very helpful and honest in picking women's Kurtas and I'll be more than happy to come back to this shop. I'd recommend this shop for Maldivians travelling in Bangalore or just any travellers in general. May god bless this business.",
+      rating: 5
+    },
+    {
+      name: "Khalid",
+      text: "He has a lot of beautiful shawls and pashmina.",
+      rating: 5
+    },
+    {
+      name: "Ahmed Almurar",
+      text: "need your number i love the oud i bout and i need more",
+      rating: 5
+    },
+    {
+      name: "Adrian Constantin",
+      text: "Very nice shop!",
+      rating: 5
+    },
+    {
+      name: "Granth Smith",
+      text: "Good products, friendly service.",
+      rating: 5
+    },
+    {
+      name: "Pavan Ubeeoi",
+      text: "Nice",
+      rating: 5
+    },
+    {
+      name: "Djalel Hioel",
+      text: "Excellent showpiece, excellent products I really liked.",
+      rating: 5
+    },
+    {
+      name: "Prakash Poojari",
+      text: "Super amazing",
+      rating: 5
+    },
+    { name: "Roxana", text: "", rating: 5 },
+    { name: "Mohammed Shujath", text: "", rating: 5 },
+    { name: "King Maker", text: "", rating: 5 },
+    { name: "Santosh Kumar", text: "", rating: 5 },
+    { name: "Creative Doodler", text: "", rating: 5 },
+    { name: "Kedar Charan Dehury", text: "", rating: 4 },
+    { name: "Saif Ali", text: "", rating: 5 },
+    { name: "Ayesha Sadaf", text: "", rating: 5 },
+  ];
+
+  const businessHours = [
+    { day: "Monday", hours: "10:30 am–9:30 pm" },
+    { day: "Tuesday", hours: "10:30 am–9:30 pm" },
+    { day: "Wednesday", hours: "10:30 am–9:30 pm" },
+    { day: "Thursday", hours: "10:30 am–9:30 pm" },
+    { day: "Friday", hours: "10:30 am–9:30 pm" },
+    { day: "Saturday", hours: "10:30 am–9:30 pm" },
+    { day: "Sunday", hours: "10:30 am–9:30 pm" },
+  ];
+
+  const products = [
+    "Oudh & Bakhoor Perfumes",
+    "Silk Sarees & Kashmiri Shawls",
+    "Jalabiyas & Traditional Wear",
+    "Turma & Dress Materials",
+    "Kids Wear",
+    "Home Decor Items",
+    "Jewellery"
+  ];
+
   return (
     <footer id="contact" className="bg-secondary text-white pt-20 pb-8">
       <div className="container mx-auto px-6">
@@ -15,16 +86,15 @@ const Footer = () => {
               </div>
               <div>
                 <h3 className="font-playfair text-2xl font-bold text-primary">
-                  Royal Attar
+                  Al Wajhi Oudh
                 </h3>
                 <p className="text-xs text-white/70 tracking-wider">
-                  HERITAGE PERFUMERY
+                  PREMIUM PERFUMERY
                 </p>
               </div>
             </div>
             <p className="text-white/80 leading-relaxed mb-6">
-              Crafting exceptional fragrances that tell stories of tradition, 
-              luxury, and timeless elegance for over 25 years.
+              Step into a world of timeless elegance and pure indulgence with our handcrafted ittars — natural perfumes derived from the heart of flowers, herbs, woods, and resins.
             </p>
             <div className="flex space-x-4">
               <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-primary transition-colors cursor-pointer">
@@ -39,68 +109,67 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Why Choose Us */}
           <div>
-            <h4 className="font-semibold text-lg mb-6">Quick Links</h4>
+            <h4 className="font-semibold text-lg mb-6">Why Choose Us?</h4>
             <ul className="space-y-3">
-              <li><a href="#home" className="text-white/80 hover:text-primary transition-colors">Home</a></li>
-              <li><a href="#collection" className="text-white/80 hover:text-primary transition-colors">Collections</a></li>
-              <li><a href="#about" className="text-white/80 hover:text-primary transition-colors">Our Heritage</a></li>
-              <li><a href="#testimonials" className="text-white/80 hover:text-primary transition-colors">Reviews</a></li>
-              <li><a href="#" className="text-white/80 hover:text-primary transition-colors">Blog</a></li>
+              <li className="flex items-start gap-2">
+                <span>🌿</span>
+                <span className="text-white/80">100% Natural Ingredients</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span>🕋</span>
+                <span className="text-white/80">Inspired by Traditional Arabic & Indian Scents</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span>🧪</span>
+                <span className="text-white/80">No Alcohol or Synthetic Additives</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span>🎁</span>
+                <span className="text-white/80">Elegant Packaging for Gifting</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span>👥</span>
+                <span className="text-white/80">Unisex, Spiritual, and Everyday Wear</span>
+              </li>
             </ul>
           </div>
 
-          {/* Collections */}
+          {/* Business Hours */}
           <div>
-            <h4 className="font-semibold text-lg mb-6">Collections</h4>
-            <ul className="space-y-3">
-              <li><a href="#" className="text-white/80 hover:text-primary transition-colors">Oud Collection</a></li>
-              <li><a href="#" className="text-white/80 hover:text-primary transition-colors">Floral Essence</a></li>
-              <li><a href="#" className="text-white/80 hover:text-primary transition-colors">Woody Harmony</a></li>
-              <li><a href="#" className="text-white/80 hover:text-primary transition-colors">Limited Editions</a></li>
-              <li><a href="#" className="text-white/80 hover:text-primary transition-colors">Gift Sets</a></li>
-            </ul>
+            <h4 className="font-semibold text-lg mb-6">Business Hours</h4>
+            <div className="space-y-2">
+              {businessHours.map((item, index) => (
+                <div key={index} className="flex justify-between text-white/80">
+                  <span>{item.day}</span>
+                  <span>{item.hours}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Contact */}
           <div>
             <h4 className="font-semibold text-lg mb-6">Contact Us</h4>
             <div className="space-y-4">
-              <div>
-                <p className="text-white/60 text-sm">Address</p>
-                <p className="text-white/90">123 Perfume Street<br />Dubai, UAE</p>
+              <div className="flex items-start gap-2">
+                <MapPin className="w-5 h-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-white/90">Tasker Town, Shivaji Nagar, Bengaluru, Karnataka 560001</p>
+                </div>
               </div>
-              <div>
-                <p className="text-white/60 text-sm">Phone</p>
-                <p className="text-white/90">+971 4 123 4567</p>
+              <div className="flex items-start gap-2">
+                <Phone className="w-5 h-5 text-primary mt-0.5" />
+                <div>
+                  <p className="text-white/90">9035511918</p>
+                </div>
               </div>
-              <div>
-                <p className="text-white/60 text-sm">Email</p>
-                <p className="text-white/90">info@royalattar.com</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Newsletter */}
-        <div className="border-t border-white/20 pt-8 mb-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <h4 className="font-playfair text-2xl font-bold mb-4">
-              Join Our <span className="text-primary">Exclusive Circle</span>
-            </h4>
-            <p className="text-white/80 mb-6">
-              Be the first to discover new collections and receive special offers
-            </p>
-            <div className="flex max-w-md mx-auto">
-              <input 
-                type="email" 
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 rounded-l-full bg-white/10 border border-white/20 text-white placeholder-white/60 focus:outline-none focus:border-primary"
-              />
-              <button className="bg-gold-gradient px-6 py-3 rounded-r-full font-medium hover:shadow-luxury transition-all duration-300">
-                Subscribe
-              </button>
+              <a href="tel:9035511918" className="inline-block mt-2">
+                <button className="bg-gold-gradient px-6 py-2 rounded-full font-medium hover:shadow-luxury transition-all duration-300 text-sm">
+                  Call Now
+                </button>
+              </a>
             </div>
           </div>
         </div>
@@ -108,7 +177,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-white/60 text-sm">
-            © 2024 Royal Attar. All rights reserved.
+            © 2024 Al Wajhi Oudh. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a href="#" className="text-white/60 hover:text-primary text-sm transition-colors">Privacy Policy</a>

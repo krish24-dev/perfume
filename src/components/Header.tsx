@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Star, Menu, X, Crown, Award } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -55,9 +56,12 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <button className="w-8 h-8 sm:w-10 sm:h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-colors">
-              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
-            </button>
+           <Link
+              to="/login"
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-sm font-medium shadow-md hover:from-yellow-500 hover:to-yellow-700 transition-all"
+            >
+              Login
+            </Link>
             
             {/* Mobile Menu Button */}
             <button 
@@ -88,6 +92,13 @@ const Header = () => {
                   {item}
                 </a>
               ))}
+              <Link
+                to="/login"
+                className="text-base font-medium text-amber-900 hover:text-amber-600 transition-colors py-2 border-b border-amber-100"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Login
+              </Link>
             </nav>
           </div>
         </div>
