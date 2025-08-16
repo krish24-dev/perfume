@@ -53,6 +53,16 @@ exports.createProduct = async (req, res) => {
     // Handle file upload via multer
     if (req.file) {
       imageUrl = `/uploads/${req.file.filename}`;
+      console.log('File uploaded, imageUrl set to:', imageUrl);
+      
+      // Verify file was created
+      const filePath = path.join(__dirname, '..', 'uploads', req.file.filename);
+      if (fs.existsSync(filePath)) {
+        const stats = fs.statSync(filePath);
+        console.log('Multer file created successfully. Size:', stats.size, 'bytes');
+      } else {
+        console.error('Multer file was not created!');
+      }
     }
     // Handle base64 image from frontend
     else if (imageUrlFromBody && imageUrlFromBody.startsWith('data:image')) {
@@ -82,15 +92,30 @@ exports.createProduct = async (req, res) => {
         imageUrl = `/uploads/${filename}`;
 
         console.log('Base64 image saved as:', filePath);
+        console.log('Base64 imageUrl set to:', imageUrl);
+        
+        // Verify file was created
+        if (fs.existsSync(filePath)) {
+          const stats = fs.statSync(filePath);
+          console.log('File created successfully. Size:', stats.size, 'bytes');
+        } else {
+          console.error('File was not created!');
+        }
       } catch (base64Error) {
         console.error('Error processing base64 image:', base64Error);
         return res.status(400).json({ message: 'Invalid image format' });
       }
     }
 
-    if (!title || !description || !rating || !price || !discount || !imageUrl) {
-      console.error('Missing required fields:', { title, description, rating, price, discount, imageUrl });
+    if (!title || !rating || !price || !discount) {
+      console.error('Missing required fields:', { title, description, rating, price, discount });
       return res.status(400).json({ message: 'Please provide all required fields' });
+    }
+
+    // Ensure we have an image URL
+    if (!imageUrl) {
+      console.error('No image URL generated from upload or base64 data');
+      return res.status(400).json({ message: 'Image is required' });
     }
 
     const newProduct = new Product({
@@ -104,6 +129,8 @@ exports.createProduct = async (req, res) => {
 
     const savedProduct = await newProduct.save();
     console.log('Product saved successfully:', savedProduct);
+    console.log('Final imageUrl value:', savedProduct.imageUrl);
+    console.log('Full product object:', JSON.stringify(savedProduct, null, 2));
 
     return res.status(201).json(savedProduct);
   } catch (error) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Plus, Star, Upload, Heart } from 'lucide-react';
+import { Trash2, Plus, Star, Upload, Heart,Sparkles,Award } from 'lucide-react';
 import { Rows } from 'lucide-react';
 
 interface AttarFormData {
@@ -18,6 +18,7 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
   const [error, setError] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sessionRestored, setSessionRestored] = useState(false);
   
   // Form state - Fixed type issues by ensuring proper types
   const [newAttar, setNewAttar] = useState<AttarFormData>({
@@ -89,19 +90,34 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
   // Check if current user is admin
   const isAdmin = (): boolean => {
     try {
-      // Check from props (passed from App.js after login)
+      // First priority: Check from props (passed from App.js after login)
       if (adminAuth && adminAuth.isAdmin) return true;
       
-      // Check from localStorage (for page refresh)
+      // Second priority: Check from localStorage (remember me)
       const storedAdminAuth = localStorage.getItem('adminAuth');
-      const isAdminFlag = localStorage.getItem('isAdmin');
-      
       if (storedAdminAuth) {
         const parsedAuth = JSON.parse(storedAdminAuth);
-        return parsedAuth.isAdmin === true;
+        if (parsedAuth.isAdmin && parsedAuth.token && isTokenValid(parsedAuth.token)) {
+          return true;
+        }
       }
       
-      return isAdminFlag === 'true';
+      // Third priority: Check from sessionStorage (session only)
+      const sessionAdminAuth = sessionStorage.getItem('adminAuth');
+      if (sessionAdminAuth) {
+        const parsedAuth = JSON.parse(sessionAdminAuth);
+        if (parsedAuth.isAdmin && parsedAuth.token && isTokenValid(parsedAuth.token)) {
+          return true;
+        }
+      }
+      
+      // Fourth priority: Check legacy isAdmin flag
+      const isAdminFlag = localStorage.getItem('isAdmin');
+      if (isAdminFlag === 'true') {
+        return true;
+      }
+      
+      return false;
     } catch (error) {
       console.error('Error checking admin status:', error);
       return false;
@@ -111,17 +127,37 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
   // Get auth token for API calls (only for admin operations)
   const getAuthToken = (): string => {
     try {
+      // First priority: Check from props
       if (adminAuth && adminAuth.token) return adminAuth.token;
       
+      // Second priority: Check from localStorage (remember me)
       const storedAdminAuth = localStorage.getItem('adminAuth');
       if (storedAdminAuth) {
         const parsedAuth = JSON.parse(storedAdminAuth);
-        return parsedAuth.token;
+        if (parsedAuth.token && isTokenValid(parsedAuth.token)) {
+          return parsedAuth.token;
+        }
       }
       
-      return localStorage.getItem('token') || '';
+      // Third priority: Check from sessionStorage (session only)
+      const sessionAdminAuth = sessionStorage.getItem('adminAuth');
+      if (sessionAdminAuth) {
+        const parsedAuth = JSON.parse(sessionAdminAuth);
+        if (parsedAuth.token && isTokenValid(parsedAuth.token)) {
+          return parsedAuth.token;
+        }
+      }
+      
+      // Fourth priority: Check legacy token
+      const legacyToken = localStorage.getItem('token');
+      if (legacyToken && isTokenValid(legacyToken)) {
+        return legacyToken;
+      }
+      
+      return '';
     } catch (error) {
-      return localStorage.getItem('token') || '';
+      console.error('Error getting auth token:', error);
+      return '';
     }
   };
 
@@ -145,6 +181,7 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
 
       const data = await response.json();
       console.log('Fetched products:', data);
+      console.log('Product imageUrls:', data.map((p: any) => ({ id: p._id, title: p.title, imageUrl: p.imageUrl })));
       setProducts(Array.isArray(data) ? data : data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -176,7 +213,13 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
     let imageBase64 = '';
     if (productData.imageFile) {
       try {
+        console.log('Converting image to base64:', {
+          name: productData.imageFile.name,
+          size: productData.imageFile.size,
+          type: productData.imageFile.type
+        });
         imageBase64 = await convertFileToBase64(productData.imageFile);
+        console.log('Image converted successfully, base64 length:', imageBase64.length);
       } catch (error) {
         console.error('Error converting image to base64:', error);
         // Continue without image if conversion fails
@@ -198,7 +241,10 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
       createdAt: new Date().toISOString()
     };
 
-    console.log('Sending product data:', { ...requestData, imageUrl: imageBase64 ? 'base64_data_present' : 'no_image' });
+    console.log('Sending product data:', { 
+      ...requestData, 
+      imageUrl: imageBase64 ? `base64_data_present_${imageBase64.substring(0, 50)}...` : 'no_image' 
+    });
     
     const response = await fetch('http://localhost:5000/api/products', {
       method: 'POST',
@@ -290,10 +336,19 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
       setIsSubmitting(true);
       setError('');
 
-      console.log('Submitting attar data:', newAttar);
+      console.log('Submitting attar data:', {
+        ...newAttar,
+        imageFile: newAttar.imageFile ? {
+          name: newAttar.imageFile.name,
+          size: newAttar.imageFile.size,
+          type: newAttar.imageFile.type
+        } : null,
+        imagePreview: newAttar.imagePreview ? 'base64_data_present' : null
+      });
       
       const addedProduct = await addProductToAPI(newAttar);
       console.log('Attar added successfully:', addedProduct);
+      console.log('New product imageUrl:', addedProduct.imageUrl);
 
       // Add to local state
       setProducts(prev => [...prev, addedProduct]);
@@ -357,10 +412,41 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
   const handleAdminButtonClick = () => {
     if (!isAdmin()) {
       setError('Admin authentication required. Please log in as admin to add products.');
+      // Redirect to login after a short delay
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
       return;
     }
     setShowAddForm(!showAddForm);
     setError('');
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      try {
+        // Clear all authentication data
+        localStorage.removeItem('adminAuth');
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('isAdmin');
+        
+        sessionStorage.removeItem('adminAuth');
+        sessionStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('isAdmin');
+        
+        console.log('Logged out successfully');
+        
+        // Redirect to login page
+        window.location.href = '/login';
+      } catch (error) {
+        console.error('Error during logout:', error);
+        // Force redirect anyway
+        window.location.href = '/login';
+      }
+    }
   };
 
   // Render star rating
@@ -402,6 +488,7 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
   // Handle image error with fallback
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
+    console.log('Image failed to load:', target.src);
     target.style.display = 'none';
     const fallback = target.parentElement?.querySelector('.image-fallback') as HTMLElement;
     if (fallback) {
@@ -413,7 +500,72 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
     fetchProducts(); // Always fetch products regardless of admin status
   }, []);
 
+  // Restore admin session from storage on component mount
+  useEffect(() => {
+    const restoreAdminSession = () => {
+      try {
+        // Check localStorage first (remember me), then sessionStorage
+        let storedAuth = localStorage.getItem('adminAuth');
+        let storageType = 'localStorage';
+        
+        if (!storedAuth) {
+          storedAuth = sessionStorage.getItem('adminAuth');
+          storageType = 'sessionStorage';
+        }
+        
+        if (storedAuth) {
+          const parsedAuth = JSON.parse(storedAuth);
+          if (parsedAuth.isAdmin && parsedAuth.token) {
+            // Validate token expiration
+            if (isTokenValid(parsedAuth.token)) {
+              console.log('Restored admin session from', storageType);
+              setSessionRestored(true);
+            } else {
+              console.log('Stored token has expired, clearing session');
+              // Clear expired token
+              if (storageType === 'localStorage') {
+                localStorage.removeItem('adminAuth');
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                localStorage.removeItem('isAdmin');
+              } else {
+                sessionStorage.removeItem('adminAuth');
+                sessionStorage.removeItem('user');
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('isAdmin');
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error restoring admin session:', error);
+      }
+    };
+
+    restoreAdminSession();
+  }, [adminAuth]);
+
+  // Check if JWT token is valid (not expired)
+  const isTokenValid = (token: string): boolean => {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Date.now() / 1000;
+      return payload.exp > currentTime;
+    } catch (error) {
+      console.error('Error validating token:', error);
+      return false;
+    }
+  };
+
   const currentUserIsAdmin = isAdmin();
+
+  // Force re-render when session is restored
+  useEffect(() => {
+    if (sessionRestored) {
+      // This will trigger a re-render and update the UI
+      console.log('Session restored, updating UI');
+    }
+  }, [sessionRestored]);
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-[#f8efe3] via-[#f6e7d7] to-[#f3e3c3] ornament-pattern-ultra relative overflow-hidden">
@@ -426,24 +578,62 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
       {/* Header */}
       <div className="relative z-10 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-5xl font-bold text-amber-900 mb-4">Premium Collections</h1>
-            <p className="text-xl text-amber-700 mb-8">Explore our curated selection of premium attars</p>
+          <div className="text-center mb-12 lg:mb-20 animate-fade-in-up">
+          <div className="flex items-center justify-center mb-6 lg:mb-8">
+            <div className="w-16 sm:w-20 h-0.5 sm:h-1 bg-gold-gradient-ultra mr-4 sm:mr-6"></div>
+            <div className="flex items-center mobile-gap">
+              <Sparkles className="mobile-icon text-gold-500 animate-luxury-pulse" />
+              <span className="text-gold-700 font-playfair font-bold tracking-wider uppercase mobile-text-lg drop-shadow-lg">Attar Collections</span>
+              <Award className="mobile-icon text-gold-500 animate-luxury-pulse" />
+            </div>
+            <div className="w-16 sm:w-20 h-0.5 sm:h-1 bg-gold-gradient-ultra ml-4 sm:ml-6"></div>
           </div>
+          <h2 className="font-playfair mobile-hero-text font-bold mb-6 lg:mb-8 text-shadow-ultra text-gold-900">
+            Discover Our <span className="text-gradient-ultra">Attars</span>
+          </h2>
+          <p className="mobile-text-lg text-muted-foreground max-w-4xl mx-auto leading-relaxed font-light">
+            Explore our curated selection of attars, each crafted with the finest ingredients and a passion for olfactory artistry. Find your signature scent and save your favorites.
+          </p>
+        </div>
 
           {/* Add New Attar Button - Always visible but shows different behavior */}
-          <div className="flex justify-center mb-8">
-            <button
-              onClick={handleAdminButtonClick}
-              className="bg-gradient-to-r from-amber-500 to-yellow-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105"
-            >
-              <Plus className="inline mr-2" size={24} />
-              Add New Attar
-            </button>
+          <div className="flex flex-col sm:flex-row justify-center items-center mb-8 gap-3 sm:gap-4 px-4">
+            {/* Back to Home button - Only show for admins */}
+            {currentUserIsAdmin && (
+              <button
+                onClick={() => window.location.href = '/'}
+                className="bg-gradient-to-r from-amber-700 to-amber-800 text-white px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base md:text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 border border-amber-600 shadow-lg w-full sm:w-auto min-w-[140px] sm:min-w-[160px]"
+              >
+                ← Back to Home
+              </button>
+            )}
+            
+            {/* Add New Attar button - Only show for admins */}
+            {currentUserIsAdmin && (
+              <button
+                onClick={handleAdminButtonClick}
+                className="bg-gradient-to-r from-amber-700 to-amber-800 text-white px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base md:text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 border border-amber-600 shadow-lg w-full sm:w-auto min-w-[140px] sm:min-w-[160px]"
+              >
+                <Plus className="inline mr-2" size={18} />
+                Add New Attar
+              </button>
+            )}
+            
+            {/* Logout button - Only show for admins */}
+            {currentUserIsAdmin && (
+              <button
+                onClick={handleLogout}
+                className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base md:text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 border border-red-500 shadow-lg w-full sm:w-auto min-w-[140px] sm:min-w-[160px]"
+              >
+                Logout
+              </button>
+            )}
+            
+            {/* Show message for non-admin users */}
             {!currentUserIsAdmin && (
-              <p className="ml-4 text-sm text-amber-600 self-center">
-                (Admin only)
-              </p>
+              <div className="text-center">
+                
+              </div>
             )}
           </div>
 
@@ -632,11 +822,13 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <div
-                  key={product._id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative group"
-                >
+              {products.map((product) => {
+                console.log(`Rendering product: ${product.title}, imageUrl: ${product.imageUrl}`);
+                return (
+                  <div
+                    key={product._id}
+                    className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative group"
+                  >
                   {/* Bestseller Badge */}
                   {product.rating >= 4 && (
                     <div className="absolute top-3 left-3 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
@@ -662,7 +854,11 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
                           src={`http://localhost:5000${product.imageUrl}`}
                           alt={product.title}
                           className="w-full h-full object-cover"
-                          onError={handleImageError}
+                          onError={(e) => {
+                            console.error('Image failed to load:', (e.target as HTMLImageElement).src);
+                            handleImageError(e);
+                          }}
+                          onLoad={() => console.log('Image loaded successfully:', product.title)}
                           loading="lazy"
                         />
                         <div className="image-fallback absolute inset-0 flex items-center justify-center" style={{display: 'none'}}>
@@ -720,7 +916,8 @@ const Collections = ({ adminAuth }: { adminAuth?: any }) => {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           )}
         </div>

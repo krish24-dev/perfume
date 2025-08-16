@@ -8,7 +8,8 @@ const productSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    required: [true, 'Description is required']
+    required: false,
+    default: ''
   },
   rating: {
     type: Number,
