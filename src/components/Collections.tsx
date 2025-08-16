@@ -1,298 +1,663 @@
-import React from 'react';
-import { Heart, Sparkles, Award, Home } from 'lucide-react';
-import { Trash2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useState, useEffect } from 'react';
+import { Trash2, Plus, Star, Upload, Heart } from 'lucide-react';
 
-const attarCollections = [
-  {
-    name: "Amber Oud",
-    description: "A luxurious blend of golden amber and rare oud, exuding warmth and sophistication.",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=500&h=400&fit=crop",
-  },
-  {
-    name: "Rose Musk",
-    description: "Delicate rose petals entwined with sensual musk for a timeless floral embrace.",
-    image: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=500&h=400&fit=crop",
-  },
-  {
-    name: "Sandal Serenity",
-    description: "Creamy sandalwood and subtle spices create a serene, meditative aura.",
-    image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=500&h=400&fit=crop",
-  },
-  {
-    name: "Jasmine Veil",
-    description: "Fresh jasmine blossoms layered with hints of citrus and white musk.",
-    image: "https://images.unsplash.com/photo-1465101178521-c1a9136a3fdc?w=500&h=400&fit=crop",
-  },
-  {
-    name: "Royal Saffron",
-    description: "Precious saffron threads and honeyed resins for a regal, golden scent.",
-    image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=500&h=400&fit=crop",
-  },
-  {
-    name: "Musk Al Tahara",
-    description: "A clean, powdery musk with a soft, comforting finish, perfect for daily wear.",
-    image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&h=400&fit=crop",
-  },
-  {
-    name: "Oudh Hind",
-    description: "Deep, resinous Indian oud with smoky undertones and a touch of spice.",
-    image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=500&h=400&fit=crop",
-  },
-  {
-    name: "Majmua",
-    description: "A complex, earthy blend of vetiver, patchouli, and floral notes, beloved in South Asia.",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=500&h=400&fit=crop",
-  },
-  {
-    name: "White Lotus",
-    description: "Ethereal lotus petals with aquatic freshness and a hint of green.",
-    image: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=500&h=400&fit=crop",
-  },
-  {
-    name: "Dehn Al Oudh Cambodi",
-    description: "Rare Cambodian oud oil, intensely woody and sweet, for true connoisseurs.",
-    image: "https://images.unsplash.com/photo-1466442929976-97f336a657be?w=500&h=400&fit=crop",
-  },
-  {
-    name: "Mitti Attar",
-    description: "The scent of the first rain on dry earth, captured in a bottle with baked clay and sandalwood.",
-    image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=500&h=400&fit=crop",
-  },
-  {
-    name: "Khus (Vetiver)",
-    description: "Cooling, green vetiver roots distilled for a refreshing, earthy aroma.",
-    image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&h=400&fit=crop",
-  },
-];
-
-const badgeData = [
-  { label: 'Bestseller', icon: <Award className="w-4 h-4" />, color: 'bg-gradient-to-r from-yellow-400 to-yellow-600' },
-  { label: 'Limited', icon: <Sparkles className="w-4 h-4" />, color: 'bg-gradient-to-r from-green-400 to-green-600' },
-  { label: 'New', icon: <Sparkles className="w-4 h-4" />, color: 'bg-gradient-to-r from-blue-400 to-blue-600' },
-  { label: 'Premium', icon: <Award className="w-4 h-4" />, color: 'bg-gradient-to-r from-yellow-400 to-yellow-600' },
-  { label: 'Exclusive', icon: <Award className="w-4 h-4" />, color: 'bg-gradient-to-r from-yellow-400 to-yellow-600' },
-];
-const getBadge = (index) => {
-  // Cycle through badges for demo
-  return badgeData[index % badgeData.length];
-};
-const getRating = (index) => 4.7 + (index % 3) * 0.1;
-const getReviews = (index) => 80 + index * 17;
-const getPrice = (index) => 99 + index * 30;
-const getOriginalPrice = (index) => getPrice(index) + 50;
-const getDiscount = (index) => Math.round(((getOriginalPrice(index) - getPrice(index)) / getOriginalPrice(index)) * 100);
-
-const Collections = () => {
-  const navigate = useNavigate();
-  // Assume current user is admin
-  const isAdmin = true;
-  // State for attar collection (so we can add new ones)
-  const [attars, setAttars] = useState(attarCollections);
-  // State for new attar form
+const Collections = ({ adminAuth }) => {
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Form state - Fixed type issues by ensuring proper types
   const [newAttar, setNewAttar] = useState({
-    name: '',
+    title: '',
     description: '',
-    image: '',
+    rating: '',
     price: '',
+    discount: '',
+    imageFile: null,
+    imagePreview: null // Add image preview
   });
-  // State for modal
-  const [showModal, setShowModal] = useState(false);
-  // Handle form input
-  const handleInputChange = (e) => {
-    setNewAttar({ ...newAttar, [e.target.name]: e.target.value });
-  };
-  // Handle image file input
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+
+  // Convert file to base64 for cross-browser compatibility
+  const convertFileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewAttar((prev) => ({ ...prev, image: reader.result as string }));
-      };
       reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Check if current user is admin
+  const isAdmin = () => {
+    try {
+      // Check from props (passed from App.js after login)
+      if (adminAuth && adminAuth.isAdmin) return true;
+      
+      // Check from localStorage (for page refresh)
+      const storedAdminAuth = localStorage.getItem('adminAuth');
+      const isAdminFlag = localStorage.getItem('isAdmin');
+      
+      if (storedAdminAuth) {
+        const parsedAuth = JSON.parse(storedAdminAuth);
+        return parsedAuth.isAdmin === true;
+      }
+      
+      return isAdminFlag === 'true';
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
     }
   };
-  // Handle form submit
-  const handleAddAttar = (e) => {
-    e.preventDefault();
-    if (!newAttar.name || !newAttar.description || !newAttar.image || !newAttar.price) return;
-    setAttars([{ ...newAttar }, ...attars]);
-    setNewAttar({ name: '', description: '', image: '', price: '' });
-    setShowModal(false); // Close modal on successful add
+
+  // Get auth token for API calls (only for admin operations)
+  const getAuthToken = () => {
+    try {
+      if (adminAuth && adminAuth.token) return adminAuth.token;
+      
+      const storedAdminAuth = localStorage.getItem('adminAuth');
+      if (storedAdminAuth) {
+        const parsedAuth = JSON.parse(storedAdminAuth);
+        return parsedAuth.token;
+      }
+      
+      return localStorage.getItem('token') || '';
+    } catch (error) {
+      return localStorage.getItem('token') || '';
+    }
   };
-  return (
-    <section className="mobile-section-padding min-h-screen bg-gradient-to-br from-[#f8efe3] via-[#f6e7d7] to-[#f3e3c3] ornament-pattern-ultra">
-      <div className="container mx-auto mobile-padding">
-        
-        {/* Modal for Add Attar Form */}
-        {isAdmin && showModal && ReactDOM.createPortal(
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={() => setShowModal(false)}>
-            <div className="bg-white/90 border border-yellow-200 rounded-2xl shadow-2xl p-8 max-w-lg w-full relative animate-fade-in-up" onClick={e => e.stopPropagation()}>
-              <button className="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl font-bold" onClick={() => setShowModal(false)} aria-label="Close">&times;</button>
-              <form onSubmit={handleAddAttar} className="flex flex-col gap-4">
-                <h3 className="font-playfair text-2xl font-bold text-gold-800 mb-2">Add New Attar</h3>
-                <input
-                  type="text"
-                  name="name"
-                  value={newAttar.name}
-                  onChange={handleInputChange}
-                  placeholder="Attar Name"
-                  className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold-400 outline-none"
-                  required
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold-400 outline-none"
-                  required
-                />
-                {newAttar.image && (
-                  <img src={newAttar.image} alt="Preview" className="w-32 h-32 object-cover rounded-xl mx-auto border border-gray-200" />
-                )}
-                <input
-                  type="number"
-                  name="price"
-                  value={newAttar.price}
-                  onChange={handleInputChange}
-                  placeholder="Price (₹)"
-                  className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold-400 outline-none"
-                  min="1"
-                  required
-                />
-                <textarea
-                  name="description"
-                  value={newAttar.description}
-                  onChange={handleInputChange}
-                  placeholder="Description"
-                  className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold-400 outline-none resize-none"
-                  rows={3}
-                  required
-                />
-                <button type="submit" className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white py-2 rounded-full font-bold shadow-lg hover:scale-105 transition-transform duration-300 text-base">Add Attar</button>
-              </form>
-            </div>
-          </div>,
-          document.body
-        )}
-        <div className="text-center mb-12 lg:mb-20 animate-fade-in-up">
-          <div className="flex items-center justify-center mb-6 lg:mb-8">
-            <div className="w-16 sm:w-20 h-0.5 sm:h-1 bg-gold-gradient-ultra mr-4 sm:mr-6"></div>
-            <div className="flex items-center mobile-gap">
-              <Sparkles className="mobile-icon text-gold-500 animate-luxury-pulse" />
-              <span className="text-gold-700 font-playfair font-bold tracking-wider uppercase mobile-text-lg drop-shadow-lg">Attar Collections</span>
-              <Award className="mobile-icon text-gold-500 animate-luxury-pulse" />
-            </div>
-            <div className="w-16 sm:w-20 h-0.5 sm:h-1 bg-gold-gradient-ultra ml-4 sm:ml-6"></div>
+
+  // Fetch products from API (NO AUTH REQUIRED - public endpoint)
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true);
+      setError('');
+      
+      const response = await fetch('http://localhost:5000/api/products', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+          // No Authorization header needed for viewing products
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch products (${response.status})`);
+      }
+
+      const data = await response.json();
+      console.log('Fetched products:', data);
+      setProducts(Array.isArray(data) ? data : data.products || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setError('Failed to load products. Please try again later.');
+      setProducts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Add product to API (ADMIN ONLY)
+  const addProductToAPI = async (productData) => {
+    if (!isAdmin()) {
+      throw new Error('Admin authentication required');
+    }
+
+    // Enhanced validation before API call
+    if (!productData.title || !productData.title.trim()) {
+      throw new Error('Product title is required');
+    }
+    
+    if (!productData.price || parseFloat(productData.price) <= 0) {
+      throw new Error('Valid price is required');
+    }
+
+    const token = getAuthToken();
+    
+    // Convert image file to base64 if present
+    let imageBase64 = '';
+    if (productData.imageFile) {
+      try {
+        imageBase64 = await convertFileToBase64(productData.imageFile);
+      } catch (error) {
+        console.error('Error converting image to base64:', error);
+        // Continue without image if conversion fails
+      }
+    }
+
+    // Prepare data with proper validation and defaults
+    const requestData = {
+      title: productData.title.trim(),
+      description: productData.description ? productData.description.trim() : '',
+      rating: productData.rating ? Math.min(Math.max(parseFloat(productData.rating), 0), 5) : 0,
+      price: parseFloat(productData.price),
+      discount: productData.discount ? Math.min(Math.max(parseInt(productData.discount), 0), 100) : 0,
+      // Send base64 encoded image for cross-browser compatibility
+      imageUrl: imageBase64 || '',
+      // Add any other required fields that your backend might expect
+      category: 'attar',
+      inStock: true,
+      createdAt: new Date().toISOString()
+    };
+
+    console.log('Sending product data:', { ...requestData, imageUrl: imageBase64 ? 'base64_data_present' : 'no_image' });
+    
+    const response = await fetch('http://localhost:5000/api/products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      },
+      body: JSON.stringify(requestData)
+    });
+
+    let data;
+    try {
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const textResponse = await response.text();
+        throw new Error(`Server returned non-JSON response: ${textResponse.substring(0, 200)}`);
+      }
+    } catch (parseError) {
+      throw new Error(`Failed to parse server response (status ${response.status})`);
+    }
+
+    if (!response.ok) {
+      const errorMessage = data.message || data.error || data.details || `Server error (${response.status})`;
+      throw new Error(errorMessage);
+    }
+
+    return data;
+  };
+
+  // Handle image file selection
+  const handleImageFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        setError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image file size must be less than 5MB');
+        return;
+      }
+
+      try {
+        // Create preview using FileReader for cross-browser compatibility
+        const preview = await convertFileToBase64(file);
+        setNewAttar(prev => ({ 
+          ...prev, 
+          imageFile: file,
+          imagePreview: preview
+        }));
+        setError(''); // Clear any previous errors
+      } catch (error) {
+        console.error('Error creating image preview:', error);
+        setError('Failed to process image file');
+      }
+    }
+  };
+
+  // Handle add attar (ADMIN ONLY)
+  const handleAddAttar = async () => {
+    if (!isAdmin()) {
+      setError('Only administrators can add products. Please log in as admin.');
+      return;
+    }
+
+    // Validation
+    if (!newAttar.title.trim()) {
+      setError('Product title is required');
+      return;
+    }
+    
+    if (!newAttar.price || parseFloat(newAttar.price) <= 0) {
+      setError('Valid price is required');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setError('');
+
+      console.log('Submitting attar data:', newAttar);
+      
+      const addedProduct = await addProductToAPI(newAttar);
+      console.log('Attar added successfully:', addedProduct);
+
+      // Add to local state
+      setProducts(prev => [...prev, addedProduct]);
+      
+      // Reset form
+      setNewAttar({
+        title: '',
+        description: '',
+        rating: '',
+        price: '',
+        discount: '',
+        imageFile: null,
+        imagePreview: null
+      });
+      
+      setShowAddForm(false);
+    } catch (error) {
+      console.error('Error adding attar:', error);
+      setError(error.message || 'Failed to add attar');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Delete product using DELETE API endpoint
+  const handleDelete = async (productId) => {
+    if (!isAdmin()) {
+      setError('Only administrators can delete products.');
+      return;
+    }
+
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      const token = getAuthToken();
+      
+      const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to delete product (${response.status})`);
+      }
+
+      // Remove from local state immediately after successful API call
+      setProducts(prev => prev.filter(product => product._id !== productId));
+      setError(''); // Clear any previous errors
+      console.log('Product deleted successfully');
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      setError('Failed to delete product: ' + error.message);
+    }
+  };
+
+  // Handle admin button click
+  const handleAdminButtonClick = () => {
+    if (!isAdmin()) {
+      setError('Admin authentication required. Please log in as admin to add products.');
+      return;
+    }
+    setShowAddForm(!showAddForm);
+    setError('');
+  };
+
+  // Render star rating
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating - fullStars >= 0.5;
+    
+    // Full stars
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <Star key={i} size={16} className="text-yellow-500 fill-yellow-500" />
+      );
+    }
+    
+    // Half star
+    if (hasHalfStar) {
+      stars.push(
+        <div key="half" className="relative">
+          <Star size={16} className="text-gray-300" />
+          <div className="absolute inset-0 overflow-hidden w-1/2">
+            <Star size={16} className="text-yellow-500 fill-yellow-500" />
           </div>
-          <h2 className="font-playfair mobile-hero-text font-bold mb-6 lg:mb-8 text-shadow-ultra text-gold-900">
-            Discover Our <span className="text-gradient-ultra">Attars</span>
-          </h2>
-          <p className="mobile-text-lg text-muted-foreground max-w-4xl mx-auto leading-relaxed font-light">
-            Explore our curated selection of attars, each crafted with the finest ingredients and a passion for olfactory artistry. Find your signature scent and save your favorites.
-          </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 xl:gap-12">
-          {attars.map((attar, index) => {
-            const badge = getBadge(index);
-            const rating = getRating(index);
-            const reviews = getReviews(index);
-            // Use admin price if present, else fallback to generated
-            const hasPrice = Object.prototype.hasOwnProperty.call(attar as any, 'price') && (attar as any).price !== undefined && (attar as any).price !== '';
-            const price = hasPrice ? parseInt((attar as any).price) : getPrice(index);
-            const originalPrice = hasPrice ? price + 50 : getOriginalPrice(index);
-            const discount = Math.round(((originalPrice - price) / originalPrice) * 100);
-            const isPremium = badge.label === 'Premium' || badge.label === 'Exclusive';
-            // Delete handler
-            const handleDelete = () => {
-              if (window.confirm('Are you sure you want to delete this product?')) {
-                setAttars(attars.filter((_, i) => i !== index));
-              }
-            };
-            return (
-              <div
-                key={index}
-                className={`group relative flex flex-col rounded-2xl shadow-xl bg-white overflow-hidden border ${isPremium ? 'border-yellow-400' : 'border-gray-100'} transition-all duration-500 w-full max-w-[370px] h-[500px] mx-auto animate-scale-in`}
-                style={{ animationDelay: `${index * 0.15}s` }}
-              >
-                {/* Admin Delete Button */}
-                {isAdmin && (
-                  <button
-                    onClick={handleDelete}
-                    className="absolute top-3 right-3 z-20 bg-white/80 hover:bg-red-500 hover:text-white text-red-500 rounded-full p-2 shadow transition-colors duration-300"
-                    title="Delete Product"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                )}
-                {/* Image & Badges */}
-                <div className="relative w-full h-[220px]">
-                  <img
-                    src={attar.image}
-                    alt={attar.name}
-                    className="w-full h-full object-cover rounded-t-2xl"
+      );
+    }
+    
+    // Empty stars
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <Star key={`empty-${i}`} size={16} className="text-gray-300" />
+      );
+    }
+    
+    return stars;
+  };
+
+  // Handle image error with fallback
+  const handleImageError = (e) => {
+    e.target.style.display = 'none';
+    const fallback = e.target.parentElement.querySelector('.image-fallback');
+    if (fallback) {
+      fallback.style.display = 'flex';
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts(); // Always fetch products regardless of admin status
+  }, []);
+
+  const currentUserIsAdmin = isAdmin();
+
+  return (
+    <section className="min-h-screen bg-gradient-to-br from-[#f8efe3] via-[#f6e7d7] to-[#f3e3c3] ornament-pattern-ultra relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full blur-3xl"></div>
+      </div>
+
+      {/* Header */}
+      <div className="relative z-10 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-5xl font-bold text-amber-900 mb-4">Premium Collections</h1>
+            <p className="text-xl text-amber-700 mb-8">Explore our curated selection of premium attars</p>
+          </div>
+
+          {/* Add New Attar Button - Always visible but shows different behavior */}
+          <div className="flex justify-center mb-8">
+            <button
+              onClick={handleAdminButtonClick}
+              className="bg-gradient-to-r from-amber-500 to-yellow-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all duration-300 hover:scale-105"
+            >
+              <Plus className="inline mr-2" size={24} />
+              Add New Attar
+            </button>
+            {!currentUserIsAdmin && (
+              <p className="ml-4 text-sm text-amber-600 self-center">
+                (Admin only)
+              </p>
+            )}
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="max-w-2xl mx-auto mb-6 bg-red-100/80 backdrop-blur-sm border border-red-400 text-red-700 px-6 py-4 rounded-xl">
+              {error}
+              {!currentUserIsAdmin && error.includes('Admin authentication') && (
+                <div className="mt-2">
+                  <a href="/login" className="text-red-800 underline font-medium">
+                    Click here to log in as admin
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Add Form - Only show if admin */}
+          {showAddForm && currentUserIsAdmin && (
+            <div className="max-w-2xl mx-auto mb-8 bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8">
+              <h2 className="text-3xl font-bold text-amber-900 mb-6 text-center">Add New Attar</h2>
+              
+              <div className="space-y-6">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder=" "
+                    value={newAttar.title}
+                    onChange={(e) => setNewAttar(prev => ({ ...prev, title: e.target.value }))}
+                    className="w-full px-6 py-4 text-lg rounded-xl border-2 border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent peer"
+                    disabled={isSubmitting}
                   />
-                  <div className="absolute top-3 left-3 flex gap-2 z-10">
-                    <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white shadow ${badge.color}`}>
-                      {badge.icon}
-                      {badge.label}
+                  <label className="absolute text-lg text-amber-600 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-amber-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-4">
+                    Attar Name *
+                  </label>
+                </div>
+
+                <div className="relative">
+                  <textarea
+                    placeholder=" "
+                    value={newAttar.description}
+                    onChange={(e) => setNewAttar(prev => ({ ...prev, description: e.target.value }))}
+                    className="w-full px-6 py-4 text-lg rounded-xl border-2 border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent peer resize-none"
+                    rows="3"
+                    disabled={isSubmitting}
+                  />
+                  <label className="absolute text-lg text-amber-600 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-amber-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-6 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-4">
+                    Description
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="relative">
+                    <input
+                      type="number"
+                      placeholder=" "
+                      value={newAttar.price}
+                      onChange={(e) => setNewAttar(prev => ({ ...prev, price: e.target.value }))}
+                      className="w-full px-6 py-4 text-lg rounded-xl border-2 border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent peer"
+                      min="0"
+                      step="0.01"
+                      disabled={isSubmitting}
+                    />
+                    <label className="absolute text-lg text-amber-600 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-amber-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-4">
+                      Price (₹) *
+                    </label>
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="number"
+                      placeholder=" "
+                      value={newAttar.rating}
+                      onChange={(e) => setNewAttar(prev => ({ ...prev, rating: e.target.value }))}
+                      className="w-full px-6 py-4 text-lg rounded-xl border-2 border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent peer"
+                      min="0"
+                      max="5"
+                      step="0.1"
+                      disabled={isSubmitting}
+                    />
+                    <label className="absolute text-lg text-amber-600 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-amber-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-4">
+                      Rating (0-5)
+                    </label>
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="number"
+                      placeholder=" "
+                      value={newAttar.discount}
+                      onChange={(e) => setNewAttar(prev => ({ ...prev, discount: e.target.value }))}
+                      className="w-full px-6 py-4 text-lg rounded-xl border-2 border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent peer"
+                      min="0"
+                      max="100"
+                      disabled={isSubmitting}
+                    />
+                    <label className="absolute text-lg text-amber-600 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-amber-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-4">
+                      Discount (%)
+                    </label>
+                  </div>
+                </div>
+
+                {/* Image Upload Section with Preview */}
+                <div className="space-y-4">
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileChange}
+                      className="w-full px-6 py-4 text-lg rounded-xl border-2 border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                      disabled={isSubmitting}
+                    />
+                    <label className="absolute text-lg text-amber-600 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 left-4">
+                      Product Image (JPEG, PNG, GIF, WebP - Max 5MB)
+                    </label>
+                  </div>
+                  
+                  {/* Image Preview */}
+                  {newAttar.imagePreview && (
+                    <div className="mt-4">
+                      <p className="text-sm text-green-600 mb-2">Image Preview:</p>
+                      <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-amber-200">
+                        <img
+                          src={newAttar.imagePreview}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error('Preview image error:', e);
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {newAttar.imageFile?.name} ({(newAttar.imageFile?.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
                     </div>
-                    {isPremium && (
-                      <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold text-white shadow bg-gradient-to-r from-yellow-500 to-yellow-700">
-                        <Award className="w-4 h-4" /> Exclusive
+                  )}
+                </div>
+
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleAddAttar}
+                    disabled={isSubmitting}
+                    className="flex-1 bg-gradient-to-r from-amber-500 to-yellow-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Adding...' : 'Add Attar'}
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setError('');
+                      setNewAttar({
+                        title: '',
+                        description: '',
+                        rating: '',
+                        price: '',
+                        discount: '',
+                        imageFile: null,
+                        imagePreview: null
+                      });
+                    }}
+                    disabled={isSubmitting}
+                    className="flex-1 bg-gray-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:bg-gray-600 transition-colors duration-300 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Products Grid - Card design matching the image */}
+          {isLoading ? (
+            <div className="text-center py-16">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-amber-600"></div>
+              <p className="mt-4 text-amber-700 text-xl">Loading products...</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-amber-700 text-2xl">No products available</p>
+              <p className="text-amber-600 text-lg mt-2">
+                {currentUserIsAdmin ? 'Add your first attar to get started' : 'Products will appear here once added by admin'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <div
+                  key={product._id}
+                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative group"
+                >
+                  {/* Bestseller Badge */}
+                  {product.rating >= 4 && (
+                    <div className="absolute top-3 left-3 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
+                      Bestseller
+                    </div>
+                  )}
+                  
+                  {/* Delete button - Only show for admins */}
+                  {currentUserIsAdmin && (
+                    <button
+                      onClick={() => handleDelete(product._id)}
+                      className="absolute top-3 right-3 bg-white/90 text-red-500 p-2 rounded-full hover:bg-red-500 hover:text-white transition-all duration-200 shadow-md z-10 opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+
+                  {/* Product Image with improved cross-browser handling */}
+                  <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+                    {product.imageUrl ? (
+                      <>
+                        <img
+                          src={product.imageUrl}
+                          alt={product.title}
+                          className="w-full h-full object-cover"
+                          onError={handleImageError}
+                          loading="lazy"
+                        />
+                        <div className="image-fallback absolute inset-0 flex items-center justify-center" style={{display: 'none'}}>
+                          <Upload size={48} className="text-gray-400" />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Upload size={48} className="text-gray-400" />
                       </div>
                     )}
                   </div>
-                </div>
-                {/* Card Body */}
-                <div className="flex-1 flex flex-col px-5 pt-4 pb-6 bg-white">
-                  {/* Rating */}
-                  <div className="flex items-center gap-1 mb-2">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i}>
-                        <svg className={`w-4 h-4 ${i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.385-2.46a1 1 0 00-1.175 0l-3.385 2.46c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.045 9.394c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" /></svg>
+
+                  {/* Product Info */}
+                  <div className="p-4">
+                    {/* Rating */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center">
+                        {renderStars(product.rating || 0)}
+                      </div>
+                      <span className="text-sm text-gray-600">
+                        {product.rating ? product.rating.toFixed(1) : '0.0'} (80 reviews)
                       </span>
-                    ))}
-                    <span className="ml-2 text-xs text-gray-500 font-semibold">{rating.toFixed(1)} ({reviews} reviews)</span>
-                  </div>
-                  {/* Name */}
-                  <h3 className="font-playfair text-xl font-bold mb-2 text-gray-900">{attar.name}</h3>
-                  {/* Description */}
-                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">{attar.description}</p>
-                  {/* Price Row */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold text-yellow-600">₹{price}</span>
-                      <span className="text-gray-400 line-through text-sm">₹{originalPrice}</span>
                     </div>
-                    <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">Save {discount}%</span>
+
+                    {/* Title */}
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">
+                      {product.title}
+                    </h3>
+                    
+                    {/* Description */}
+                    {product.description && (
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                        {product.description}
+                      </p>
+                    )}
+                    
+                    {/* Price */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl font-bold text-gray-900">
+                          ₹{product.price}
+                        </span>
+                        {product.discount > 0 && (
+                          <>
+                            <span className="text-sm text-gray-500 line-through">
+                              ₹{(product.price * (1 + product.discount / 100)).toFixed(0)}
+                            </span>
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                              Save {product.discount}%
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  {/* Add to Collection Button */}
-                
                 </div>
-              </div>
-            );
-          })}
-        </div>
-        {/* Home Button and Add Attar Button at Bottom Center */}
-        <div className="flex justify-center items-center gap-4 mt-10 sm:mt-12 mb-4">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 bg-gold-gradient-ultra text-white font-semibold px-5 sm:px-6 py-2 sm:py-3 rounded-full shadow-luxury hover:scale-105 transition-transform duration-300 focus:outline-none focus:ring-2 focus:ring-gold-400 text-base sm:text-lg"
-          >
-            <Home className="w-5 h-5 sm:w-6 sm:h-6" />
-            Home
-          </button>
-          {isAdmin && (
-            <button
-              onClick={() => setShowModal(true)}
-              className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-bold px-6 sm:px-8 py-2 sm:py-3 rounded-full shadow-lg hover:scale-105 transition-transform duration-300 text-base sm:text-lg"
-            >
-              + Add Attar
-            </button>
+              ))}
+            </div>
           )}
         </div>
       </div>
