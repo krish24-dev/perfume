@@ -1,6 +1,9 @@
 import React from 'react';
 import { Crown, Flower, TreePine, Sparkles, Award, Gem } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Image1 from '../Assets/pic1.png';
+import Image2 from '../Assets/pic2.png';
+import Image3 from '../Assets/pic5.png';
 
 const Categories = () => {
   const navigate = useNavigate();
@@ -8,21 +11,21 @@ const Categories = () => {
     {
       name: "Oud Royale",
       description: "The crown jewel of fragrances - rich, complex, and eternally captivating with rare Cambodian oud",
-      image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=500&h=400&fit=crop",
+      image: Image1,
       gradient: "from-amber-900 to-yellow-600",
       premium: true
     },
     {
       name: "Floral Symphony",
       description: "A harmonious blend of the world's most precious floral essences from legendary gardens",
-      image: "https://images.unsplash.com/photo-1472396961693-142e6e269027?w=500&h=400&fit=crop",
+      image: Image2,
       gradient: "from-rose-800 to-pink-600",
       premium: false
     },
     {
       name: "Woody Majesty",
       description: "Noble woods and rare resins crafted into timeless compositions that speak of heritage",
-      image: "https://images.unsplash.com/photo-1466442929976-97f336a657be?w=500&h=400&fit=crop",
+      image: Image3,
       gradient: "from-emerald-900 to-teal-600",
       premium: true
     }

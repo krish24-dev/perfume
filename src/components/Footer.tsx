@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Star, Clock, MapPin, Phone, Mail, Heart } from 'lucide-react';
+import { Star, Clock, MapPin, Phone, Mail, Heart, Map } from 'lucide-react';
 
 const Footer = () => {
   const reviews = [
@@ -75,75 +74,74 @@ const Footer = () => {
   ];
 
   return (
-    <footer id="contact" className="bg-secondary text-white pt-20 pb-8">
-      <div className="container mx-auto px-6">
-        <div className="grid md:grid-cols-4 gap-8 mb-12">
+    <footer id="contact" className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 text-white pt-20 pb-8 overflow-hidden">
+      {/* Background Decorative Elements */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-10 left-10 w-32 h-32 border border-yellow-500/30 rounded-full"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 border border-yellow-400/20 rounded-full"></div>
+        <div className="absolute bottom-20 left-1/3 w-40 h-40 border border-yellow-300/10 rounded-full"></div>
+      </div>
+      
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="grid md:grid-cols-4 gap-12 mb-16">
           {/* Brand */}
           <div className="col-span-1">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="w-12 h-12 bg-gold-gradient rounded-full flex items-center justify-center">
-                <Star className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-4 mb-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 rounded-full flex items-center justify-center shadow-xl">
+                <Star className="w-8 h-8 text-white drop-shadow-md" />
               </div>
               <div>
-                <h3 className="font-playfair text-2xl font-bold text-primary">
+                <h3 className="font-playfair text-3xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-500 bg-clip-text text-transparent">
                   Al Wajhi Oudh
                 </h3>
-                <p className="text-xs text-white/70 tracking-wider">
+                <p className="text-xs text-yellow-300/80 tracking-[0.2em] font-medium mt-1">
                   PREMIUM PERFUMERY
                 </p>
               </div>
             </div>
-            <p className="text-white/80 leading-relaxed mb-6">
-              Step into a world of timeless elegance and pure indulgence with our handcrafted ittars — natural perfumes derived from the heart of flowers, herbs, woods, and resins.
+            <p className="text-gray-300 leading-relaxed mb-8 text-sm">
+              Step into a world of timeless elegance and pure indulgence with our handcrafted attars — natural perfumes derived from the heart of flowers, herbs, woods, and resins.
             </p>
-            <div className="flex space-x-4">
-              <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-primary transition-colors cursor-pointer">
-                <span className="text-sm">f</span>
-              </div>
-              <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-primary transition-colors cursor-pointer">
-                <span className="text-sm">ig</span>
-              </div>
-              <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-primary transition-colors cursor-pointer">
-                <span className="text-sm">tw</span>
-              </div>
-            </div>
           </div>
 
           {/* Why Choose Us */}
           <div>
-            <h4 className="font-semibold text-lg mb-6">Why Choose Us?</h4>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-2">
-                <span>🌿</span>
-                <span className="text-white/80">100% Natural Ingredients</span>
+            <h4 className="font-playfair text-xl font-semibold mb-8 text-yellow-300">Why Choose Us?</h4>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3 group">   
+                <div className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full mt-2 group-hover:scale-125 transition-transform duration-300"></div>             
+                <span className="text-gray-300 group-hover:text-white transition-colors duration-300 text-sm leading-relaxed">100% Natural Ingredients</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span>🕋</span>
-                <span className="text-white/80">Inspired by Traditional Arabic & Indian Scents</span>
+              <li className="flex items-start gap-3 group">
+                <div className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full mt-2 group-hover:scale-125 transition-transform duration-300"></div>    
+                <span className="text-gray-300 group-hover:text-white transition-colors duration-300 text-sm leading-relaxed">Inspired by Traditional Arabic & Indian Scents</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span>🧪</span>
-                <span className="text-white/80">No Alcohol or Synthetic Additives</span>
+              <li className="flex items-start gap-3 group">
+                <div className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full mt-2 group-hover:scale-125 transition-transform duration-300"></div>    
+                <span className="text-gray-300 group-hover:text-white transition-colors duration-300 text-sm leading-relaxed">No Alcohol or Synthetic Additives</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span>🎁</span>
-                <span className="text-white/80">Elegant Packaging for Gifting</span>
+              <li className="flex items-start gap-3 group">
+                <div className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full mt-2 group-hover:scale-125 transition-transform duration-300"></div>    
+                <span className="text-gray-300 group-hover:text-white transition-colors duration-300 text-sm leading-relaxed">Elegant Packaging for Gifting</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span>👥</span>
-                <span className="text-white/80">Unisex, Spiritual, and Everyday Wear</span>
+              <li className="flex items-start gap-3 group">
+                <div className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full mt-2 group-hover:scale-125 transition-transform duration-300"></div>    
+                <span className="text-gray-300 group-hover:text-white transition-colors duration-300 text-sm leading-relaxed">Unisex, Spiritual, and Everyday Wear</span>
               </li>
             </ul>
           </div>
 
           {/* Business Hours */}
           <div>
-            <h4 className="font-semibold text-lg mb-6">Business Hours</h4>
-            <div className="space-y-2">
+            <h4 className="font-playfair text-xl font-semibold mb-8 text-yellow-300 flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Business Hours
+            </h4>
+            <div className="space-y-3 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm border border-white/10 rounded-xl p-6">
               {businessHours.map((item, index) => (
-                <div key={index} className="flex justify-between text-white/80">
-                  <span>{item.day}</span>
-                  <span>{item.hours}</span>
+                <div key={index} className="flex justify-between items-center text-sm hover:bg-white/5 px-3 py-2 rounded-lg transition-colors duration-300">
+                  <span className="text-gray-300 font-medium">{item.day}</span>
+                  <span className="text-yellow-200 font-medium">{item.hours}</span>
                 </div>
               ))}
             </div>
@@ -151,38 +149,58 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h4 className="font-semibold text-lg mb-6">Contact Us</h4>
-            <div className="space-y-4">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-5 h-5 text-primary mt-0.5" />
+            <h4 className="font-playfair text-xl font-semibold mb-8 text-yellow-300">Contact Us</h4>
+            <div className="space-y-6">
+              <div className="group flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm border border-white/10 hover:border-yellow-400/30 transition-all duration-300">
+                <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-yellow-500/25 transition-shadow duration-300">
+                  <MapPin className="w-5 h-5 text-white" />
+                </div>
                 <div>
-                  <p className="text-white/90">Tasker Town, Shivaji Nagar, Bengaluru, Karnataka 560001</p>
+                  <p className="text-gray-300 group-hover:text-white transition-colors duration-300 text-sm leading-relaxed">Tasker Town, Shivaji Nagar, Bengaluru, Karnataka 560001</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2">
-                <Phone className="w-5 h-5 text-primary mt-0.5" />
+              <div className="group flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm border border-white/10 hover:border-yellow-400/30 transition-all duration-300">
+                <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-yellow-500/25 transition-shadow duration-300">
+                  <Phone className="w-5 h-5 text-white" />
+                </div>
                 <div>
-                  <p className="text-white/90">9035511918</p>
+                  <p className="text-gray-300 group-hover:text-white transition-colors duration-300 text-sm font-medium">9035511918</p>
                 </div>
               </div>
-              <a href="tel:9035511918" className="inline-block mt-2">
-                <button className="bg-gold-gradient px-6 py-2 rounded-full font-medium hover:shadow-luxury transition-all duration-300 text-sm">
-                  Call Now
-                </button>
-              </a>
+              <div className="flex flex-col gap-3 pt-4">
+                <a href="tel:9035511918" className="group">
+                  <button className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:shadow-yellow-500/25 transition-all duration-300 text-sm transform group-hover:scale-[1.02] group-active:scale-[0.98]">
+                    <Phone className="w-4 h-4 inline mr-2" />
+                    Call Now
+                  </button>
+                </a>
+                <a href="https://share.google/yYMFsJLFrEhHe8Y9u" target="_blank" rel="noopener noreferrer" className="group">
+                  <button className="w-full bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 hover:border-yellow-400/50 hover:from-yellow-500/10 hover:to-yellow-600/10 px-6 py-3 rounded-xl font-semibold transition-all duration-300 text-sm transform group-hover:scale-[1.02] group-active:scale-[0.98] text-gray-300 hover:text-white">
+                    <Map className="w-4 h-4 inline mr-2" />
+                    View on Map
+                  </button>
+                </a>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-white/60 text-sm">
-            © 2024 Al Wajhi Oudh. All rights reserved.
-          </p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-white/60 hover:text-primary text-sm transition-colors">Privacy Policy</a>
-            <a href="#" className="text-white/60 hover:text-primary text-sm transition-colors">Terms of Service</a>
-            <a href="#" className="text-white/60 hover:text-primary text-sm transition-colors">Shipping Info</a>
+        <div className="border-t border-gradient-to-r from-transparent via-white/20 to-transparent pt-12 mt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center gap-3 mb-6 md:mb-0">
+              <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
+                <Heart className="w-4 h-4 text-white" />
+              </div>
+              <p className="text-gray-400 text-sm">
+                © 2024 Al Wajhi Oudh. Crafted with love in Bangalore.
+              </p>
+            </div>
+            <div className="flex space-x-8">
+              <a href="#" className="text-gray-400 hover:text-yellow-400 text-sm transition-colors duration-300 hover:underline decoration-yellow-400 underline-offset-4">Privacy Policy</a>
+              <a href="#" className="text-gray-400 hover:text-yellow-400 text-sm transition-colors duration-300 hover:underline decoration-yellow-400 underline-offset-4">Terms of Service</a>
+              <a href="#" className="text-gray-400 hover:text-yellow-400 text-sm transition-colors duration-300 hover:underline decoration-yellow-400 underline-offset-4">Shipping Info</a>
+            </div>
           </div>
         </div>
       </div>

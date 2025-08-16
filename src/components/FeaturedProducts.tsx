@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Star, Award, Gem, Sparkles, Crown, Shield, Eye, Heart, ShoppingCart, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Image1 from '../Assets/pic13.png';
+import Image2 from '../Assets/pic14.png';
+import Image3 from '../Assets/pic4.png';
 
 const FeaturedProducts = () => {
   const [hoveredProduct, setHoveredProduct] = useState(null);
@@ -8,64 +11,64 @@ const FeaturedProducts = () => {
   const products = [
     {
       id: 1,
-      name: "Royal Oud Majesty",
+      name: "Mukhallat Al Oud Al Aseel",
       price: "$299",
       originalPrice: "$399",
       rating: 4.9,
       reviews: 156,
-      image: "https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=500&fit=crop",
+      image: Image1,
       badge: "Bestseller",
       badgeIcon: Award,
-      description: "A legendary blend of Cambodian oud with Bulgarian rose and precious saffron threads from Kashmir",
+      description: "A rare blend of pure Cambodian oud with aged Indian sandalwood, enriched with precious saffron threads from Kashmir and a touch of Bulgarian rose absolute. This traditional mukhallat represents centuries of perfumery mastery.",
       premium: true,
       exclusive: true,
-      category: "Luxury"
+      category: "Luxury Oud"
     },
     {
       id: 2,
-      name: "Jasmine Mystique",
+      name: "Jasmine Al Ward Al Abyad",
       price: "$179",
       originalPrice: "$229",
       rating: 4.8,
       reviews: 89,
-      image: "https://images.unsplash.com/photo-1472396961693-142e6e269027?w=400&h=500&fit=crop",
+      image: Image2,
       badge: "Limited",
       badgeIcon: Gem,
-      description: "Rare night-blooming jasmine with Madagascar vanilla and ethereal white musk essence",
+      description: "Rare night-blooming jasmine sambac from the valleys of Kashmir, blended with Madagascar vanilla beans and ethereal white musk essence. A floral masterpiece that captures the essence of moonlit gardens.",
       premium: false,
       exclusive: false,
       category: "Floral"
     },
     {
       id: 3,
-      name: "Sandalwood Serenity",
+      name: "Sandalwood Al Hindi Al Asli",
       price: "$149",
       originalPrice: "$199",
       rating: 4.7,
       reviews: 203,
-      image: "https://images.unsplash.com/photo-1466442929976-97f336a657be?w=400&h=500&fit=crop",
+      image: Image3,
       badge: "New",
       badgeIcon: Sparkles,
-      description: "Pure Mysore sandalwood with delicate rose petals and ancient amber undertones",
+      description: "Pure Mysore sandalwood oil aged for 15 years, delicately blended with Damask rose petals and ancient amber resin. This traditional blend brings serenity and spiritual connection.",
       premium: false,
       exclusive: false,
       category: "Woody"
     },
     {
       id: 4,
-      name: "Amber Royale",
+      name: "Amber Al Anbar Al Qadeem",
       price: "$219",
       originalPrice: "$279",
       rating: 4.9,
       reviews: 127,
-      image: "https://images.unsplash.com/photo-1492321936769-b49830bc1d1e?w=400&h=500&fit=crop",
+      image: Image1,
       badge: "Premium",
       badgeIcon: Crown,
-      description: "Ancient amber resin with oriental spices and precious agarwood from sacred forests",
+      description: "Ancient Baltic amber resin aged for decades, combined with rare agarwood from the sacred forests of Assam and oriental spices including cardamom, clove, and cinnamon. A regal blend fit for royalty.",
       premium: true,
       exclusive: true,
       category: "Oriental"
-    }
+    },
   ];
 
   const getBadgeColor = (badge) => {
@@ -121,7 +124,7 @@ const FeaturedProducts = () => {
        
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-16">
           {products.map((product, index) => (
             <div 
               key={product.id}

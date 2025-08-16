@@ -1,4 +1,6 @@
 const Product = require('../models/Product');
+const fs = require('fs');
+const path = require('path');
 
 // =======================
 // Get all products
@@ -37,7 +39,7 @@ exports.getProductById = async (req, res) => {
 };
 
 // =======================
-// Create product (debug version)
+// Create product (handles both file uploads and base64)
 // =======================
 exports.createProduct = async (req, res) => {
   try {
@@ -46,7 +48,45 @@ exports.createProduct = async (req, res) => {
 
     const { title, description, rating, price, discount, imageUrl: imageUrlFromBody } = req.body;
 
-    const imageUrl = req.file ? req.file.path : imageUrlFromBody;
+    let imageUrl = '';
+
+    // Handle file upload via multer
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
+    }
+    // Handle base64 image from frontend
+    else if (imageUrlFromBody && imageUrlFromBody.startsWith('data:image')) {
+      try {
+        // Create uploads directory if it doesn't exist
+        const uploadsDir = path.join(__dirname, '..', 'uploads');
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+
+        // Extract base64 data and file extension
+        const matches = imageUrlFromBody.match(/^data:image\/([a-zA-Z]+);base64,(.+)$/);
+        if (!matches) {
+          throw new Error('Invalid base64 image format');
+        }
+
+        const fileExtension = matches[1];
+        const base64Data = matches[2];
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        // Generate unique filename
+        const filename = `base64-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
+        const filePath = path.join(uploadsDir, filename);
+
+        // Save file
+        fs.writeFileSync(filePath, buffer);
+        imageUrl = `/uploads/${filename}`;
+
+        console.log('Base64 image saved as:', filePath);
+      } catch (base64Error) {
+        console.error('Error processing base64 image:', base64Error);
+        return res.status(400).json({ message: 'Invalid image format' });
+      }
+    }
 
     if (!title || !description || !rating || !price || !discount || !imageUrl) {
       console.error('Missing required fields:', { title, description, rating, price, discount, imageUrl });
@@ -89,13 +129,53 @@ exports.updateProduct = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
+    let imageUrl = product.imageUrl;
+
+    // Handle file upload via multer
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
+    }
+    // Handle base64 image update
+    else if (imageUrlFromBody && imageUrlFromBody.startsWith('data:image')) {
+      try {
+        // Create uploads directory if it doesn't exist
+        const uploadsDir = path.join(__dirname, '..', 'uploads');
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+
+        // Extract base64 data and file extension
+        const matches = imageUrlFromBody.match(/^data:image\/([a-zA-Z]+);base64,(.+)$/);
+        if (!matches) {
+          throw new Error('Invalid base64 image format');
+        }
+
+        const fileExtension = matches[1];
+        const base64Data = matches[2];
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        // Generate unique filename
+        const filename = `base64-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
+        const filePath = path.join(uploadsDir, filename);
+
+        // Save file
+        fs.writeFileSync(filePath, buffer);
+        imageUrl = `/uploads/${filename}`;
+
+        console.log('Base64 image updated and saved as:', filePath);
+      } catch (base64Error) {
+        console.error('Error processing base64 image update:', base64Error);
+        return res.status(400).json({ message: 'Invalid image format' });
+      }
+    }
+
     const productFields = {
       title: title || product.title,
       description: description || product.description,
       rating: rating || product.rating,
       price: price || product.price,
       discount: discount || product.discount,
-      imageUrl: req.file ? req.file.path : imageUrlFromBody || product.imageUrl
+      imageUrl: imageUrl
     };
 
     product = await Product.findByIdAndUpdate(id, { $set: productFields }, { new: true });

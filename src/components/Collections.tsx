@@ -1,36 +1,93 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Plus, Star, Upload, Heart } from 'lucide-react';
+import { Rows } from 'lucide-react';
 
-const Collections = ({ adminAuth }) => {
-  const [products, setProducts] = useState([]);
+interface AttarFormData {
+  title: string;
+  description: string;
+  rating: string;
+  price: string;
+  discount: string;
+  imageFile: File | null;
+  imagePreview: string | null;
+}
+
+const Collections = ({ adminAuth }: { adminAuth?: any }) => {
+  const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Form state - Fixed type issues by ensuring proper types
-  const [newAttar, setNewAttar] = useState({
+  const [newAttar, setNewAttar] = useState<AttarFormData>({
     title: '',
     description: '',
     rating: '',
     price: '',
     discount: '',
     imageFile: null,
-    imagePreview: null // Add image preview
+    imagePreview: null
   });
 
-  // Convert file to base64 for cross-browser compatibility
-  const convertFileToBase64 = (file) => {
+  // Convert file to base64 for cross-browser compatibility with compression
+  const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
+      
+      // Compress image if it's too large
+      if (file.size > 2 * 1024 * 1024) { // If larger than 2MB
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+          // Calculate new dimensions (max 800x800)
+          const maxSize = 800;
+          let { width, height } = img;
+          
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw and compress
+          ctx?.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            } else {
+              reject(new Error('Failed to compress image'));
+            }
+          }, 'image/jpeg', 0.7); // 70% quality
+        };
+        
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+      } else {
+        // For smaller files, just convert directly
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+      }
     });
   };
 
   // Check if current user is admin
-  const isAdmin = () => {
+  const isAdmin = (): boolean => {
     try {
       // Check from props (passed from App.js after login)
       if (adminAuth && adminAuth.isAdmin) return true;
@@ -52,7 +109,7 @@ const Collections = ({ adminAuth }) => {
   };
 
   // Get auth token for API calls (only for admin operations)
-  const getAuthToken = () => {
+  const getAuthToken = (): string => {
     try {
       if (adminAuth && adminAuth.token) return adminAuth.token;
       
@@ -69,7 +126,7 @@ const Collections = ({ adminAuth }) => {
   };
 
   // Fetch products from API (NO AUTH REQUIRED - public endpoint)
-  const fetchProducts = async () => {
+  const fetchProducts = async (): Promise<void> => {
     try {
       setIsLoading(true);
       setError('');
@@ -99,7 +156,7 @@ const Collections = ({ adminAuth }) => {
   };
 
   // Add product to API (ADMIN ONLY)
-  const addProductToAPI = async (productData) => {
+  const addProductToAPI = async (productData: AttarFormData): Promise<any> => {
     if (!isAdmin()) {
       throw new Error('Admin authentication required');
     }
@@ -174,7 +231,7 @@ const Collections = ({ adminAuth }) => {
   };
 
   // Handle image file selection
-  const handleImageFileChange = async (e) => {
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type
@@ -184,9 +241,9 @@ const Collections = ({ adminAuth }) => {
         return;
       }
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Image file size must be less than 5MB');
+      // Validate file size (max 10MB before compression)
+      if (file.size > 10 * 1024 * 1024) {
+        setError('Image file size must be less than 10MB. Please select a smaller image.');
         return;
       }
 
@@ -199,9 +256,14 @@ const Collections = ({ adminAuth }) => {
           imagePreview: preview
         }));
         setError(''); // Clear any previous errors
+        
+        // Show compression info if file was large
+        if (file.size > 2 * 1024 * 1024) {
+          console.log('Image will be compressed for optimal upload size');
+        }
       } catch (error) {
         console.error('Error creating image preview:', error);
-        setError('Failed to process image file');
+        setError('Failed to process image file. Please try a different image.');
       }
     }
   };
@@ -250,14 +312,14 @@ const Collections = ({ adminAuth }) => {
       setShowAddForm(false);
     } catch (error) {
       console.error('Error adding attar:', error);
-      setError(error.message || 'Failed to add attar');
+      setError(error instanceof Error ? error.message : 'Failed to add attar');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // Delete product using DELETE API endpoint
-  const handleDelete = async (productId) => {
+  const handleDelete = async (productId: string) => {
     if (!isAdmin()) {
       setError('Only administrators can delete products.');
       return;
@@ -287,7 +349,7 @@ const Collections = ({ adminAuth }) => {
       console.log('Product deleted successfully');
     } catch (error) {
       console.error('Error deleting product:', error);
-      setError('Failed to delete product: ' + error.message);
+      setError('Failed to delete product: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
 
@@ -302,7 +364,7 @@ const Collections = ({ adminAuth }) => {
   };
 
   // Render star rating
-  const renderStars = (rating) => {
+  const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating - fullStars >= 0.5;
@@ -338,9 +400,10 @@ const Collections = ({ adminAuth }) => {
   };
 
   // Handle image error with fallback
-  const handleImageError = (e) => {
-    e.target.style.display = 'none';
-    const fallback = e.target.parentElement.querySelector('.image-fallback');
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    target.style.display = 'none';
+    const fallback = target.parentElement?.querySelector('.image-fallback') as HTMLElement;
     if (fallback) {
       fallback.style.display = 'flex';
     }
@@ -424,7 +487,7 @@ const Collections = ({ adminAuth }) => {
                     value={newAttar.description}
                     onChange={(e) => setNewAttar(prev => ({ ...prev, description: e.target.value }))}
                     className="w-full px-6 py-4 text-lg rounded-xl border-2 border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent peer resize-none"
-                    rows="3"
+                    rows={3}
                     disabled={isSubmitting}
                   />
                   <label className="absolute text-lg text-amber-600 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-focus:text-amber-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-6 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-4">
@@ -494,7 +557,7 @@ const Collections = ({ adminAuth }) => {
                       disabled={isSubmitting}
                     />
                     <label className="absolute text-lg text-amber-600 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 left-4">
-                      Product Image (JPEG, PNG, GIF, WebP - Max 5MB)
+                      Product Image (JPEG, PNG, GIF, WebP - Max 10MB)
                     </label>
                   </div>
                   
@@ -509,7 +572,8 @@ const Collections = ({ adminAuth }) => {
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             console.error('Preview image error:', e);
-                            e.target.style.display = 'none';
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
                           }}
                         />
                       </div>
@@ -595,7 +659,7 @@ const Collections = ({ adminAuth }) => {
                     {product.imageUrl ? (
                       <>
                         <img
-                          src={product.imageUrl}
+                          src={`http://localhost:5000${product.imageUrl}`}
                           alt={product.title}
                           className="w-full h-full object-cover"
                           onError={handleImageError}

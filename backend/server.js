@@ -14,7 +14,10 @@ const app = express();
 // Middleware
 // ==================
 app.use(cors());
-app.use(express.json());
+
+// Increase payload size limit for base64 images (up to 50MB)
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve uploaded images statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -50,6 +53,16 @@ app.use('/api/products', productRoutes);
 // ==================
 app.use((err, req, res, next) => {
   console.error('🔥 Error:', err.stack);
+  
+  // Handle payload too large error specifically
+  if (err.type === 'entity.too.large') {
+    return res.status(413).json({ 
+      message: 'Image file is too large. Please use an image smaller than 10MB.',
+      error: 'PAYLOAD_TOO_LARGE'
+    });
+  }
+  
+  // Handle other errors
   res.status(500).json({ message: 'Something went wrong!' });
 });
 

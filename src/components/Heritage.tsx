@@ -1,6 +1,10 @@
+// At the top of the file
 import React, { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion';
-import Image1 from '../assets/image1.png';
+import { motion, useScroll, useTransform, useInView, AnimatePresence, useMotionValueEvent } from 'framer-motion';
+import Image1 from '../Assets/pic15.png';
+import Image2 from '../Assets/pic10.png';
+import Image3 from '../Assets/pic9.png';
+
 
 const heritageData = [
   {
@@ -8,8 +12,8 @@ const heritageData = [
     description:
       "At Premium Ittars, we are dedicated to crafting the finest natural perfumes using traditional methods passed down through generations. Our journey began with a passion for authentic fragrances and a commitment to purity. We believe in the power of nature to create scents that are not only beautiful but also evoke a sense of well-being and connection to ancient traditions.",
     image:
-      "https://images.unsplash.com/photo-1466442929976-97f336a657be?w=800&h=1000&fit=crop",
-    stat: "20+",
+    Image1,
+    stat: "10+",
     statLabel: "Years of Expertise",
     bg: "from-[#f8efe3] via-[#f6e7d7] to-[#f3e3c3]",
   },
@@ -18,7 +22,7 @@ const heritageData = [
     description:
       "We meticulously source only the finest natural ingredients from around the world, ensuring each ittar is a masterpiece of aroma and purity. Our commitment to traditional distillation methods guarantees that every bottle captures the true essence of its botanical components. Experience the difference of alcohol-free, long-lasting fragrances that are kind to your skin and soul.",
     image:
-      Image1,
+      Image2,
     stat: "100%",
     statLabel: "Natural & Pure",
     bg: "from-[#f6e7d7] via-[#f3e3c3] to-[#f8efe3]",
@@ -28,7 +32,7 @@ const heritageData = [
     description:
       "Each ittar is a testament to the artistry and dedication of our master perfusers. With decades of experience, they blend rare and exquisite oils to create unique fragrances that are both timeless and contemporary. Our small-batch production ensures the highest quality and attention to detail, making each Premium Ittar a truly exclusive experience.",
     image:
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&h=1000&fit=crop",
+    Image3,
     stat: "50+",
     statLabel: "Unique Blends",
     bg: "from-[#f3e3c3] via-[#f8efe3] to-[#f6e7d7]",
@@ -96,19 +100,15 @@ const Heritage = () => {
   };
   
   // Update active section based on scroll position
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.onChange(value => {
-      if (!isMobile && !isTablet) {
-        const sectionIndex = Math.min(
-          heritageData.length - 1,
-          Math.floor(value * heritageData.length)
-        );
-        setCurrentSection(sectionIndex);
-      }
-    });
-    
-    return () => unsubscribe();
-  }, [scrollYProgress, isMobile, isTablet]);
+  useMotionValueEvent(scrollYProgress, "change", (value) => {
+    if (!isMobile && !isTablet) {
+      const sectionIndex = Math.min(
+        heritageData.length - 1,
+        Math.floor(value * heritageData.length)
+      );
+      setCurrentSection(sectionIndex);
+    }
+  });
 
   return (
     <section 
@@ -118,7 +118,7 @@ const Heritage = () => {
     >
       {/* Fixed viewport container */}
       <div 
-        className="sticky top-0 h-screen w-full overflow-hidden"
+        className="sticky top-0 h-screen w-full overflow-hidden relative"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

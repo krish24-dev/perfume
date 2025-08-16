@@ -16,7 +16,19 @@ const storage = multer.diskStorage({
     cb(null, uniqueSuffix);
   }
 });
-const upload = multer({ storage });
+
+// Make image upload optional
+const upload = multer({ 
+  storage,
+  fileFilter: (req, file, cb) => {
+    // Accept image files only
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  }
+});
 
 // =======================
 // Routes
@@ -28,10 +40,10 @@ router.get('/', productController.getAllProducts);
 // Get single product by ID (public)
 router.get('/:id', productController.getProductById);
 
-// Create product (admin only) with single image upload
+// Create product (admin only) - image upload is optional now
 router.post('/', auth, upload.single('imageUrl'), productController.createProduct);
 
-// Update product (admin only) with optional single image upload
+// Update product (admin only) - image upload is optional now
 router.patch('/:id', auth, upload.single('imageUrl'), productController.updateProduct);
 
 // Delete product (admin only)
